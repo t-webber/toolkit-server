@@ -1,0 +1,3 @@
+[submodule "personal-website"]
+	path = personal-website
+	url = https://github.com/t-webber/personal-website
