@@ -50,7 +50,7 @@ const DOMAIN_BODY: LazyLock<String> = LazyLock::new(|| {
 
 fn default_middleware(_req: Request<Incoming>) -> Result<Response<String>, Error> {
     Response::builder()
-        .body("Default router\n".to_owned())
+        .body("<div style=\"color:red;\">Default router</div>\n".to_owned())
         .map_err(Error::from_msg("Failed to build default response"))
 }
 
@@ -70,7 +70,7 @@ async fn middleware(req: Request<Incoming>) -> Result<Response<String>, Error> {
     let try_subdomain = host
         .split('.')
         .next()
-        .ok_or_else(|| Error::from_both("Invalid host", "Missing"))?;
+        .ok_or_else(|| Error::from_both("Invalid host", "Malformed split"))?;
     let subdomain = if try_subdomain == *DOMAIN_BODY {
         None
     } else {
@@ -79,9 +79,9 @@ async fn middleware(req: Request<Incoming>) -> Result<Response<String>, Error> {
     match subdomain {
         None | Some("www") => default_middleware(req),
         Some("api") => api_middleware(req),
-        Some(_) => Response::builder()
+        Some(subdomain) => Response::builder()
             .status(StatusCode::NOT_FOUND)
-            .body("Page not found | Invalid subdomain.\n".to_owned())
+            .body(format!("Page not found | Invalid subdomain {subdomain}\n"))
             .map_err(Error::from_msg("Failed to build 404")),
     }
 }
